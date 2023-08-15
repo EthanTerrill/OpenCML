@@ -1,0 +1,23 @@
+
+Todo:
+  -right now:
+    Speeding up constructor/desctructor speeds
+  -Soon:
+    run security tests on code
+    add support for CPU based devices 
+    Implement optimizations to current convolution code 
+            (most threads only use up a small portion of the time allocated to them and thus most of the time in the proram is spent on read/write operations)
+    add the data and data set classes to improve end user experience
+    add unit tests (this is very difficult to do early on because of the way machine learning works but it can be done TO AN EXTENT)
+    test for bugs
+    Implement GAN class
+    Imorove nonlinearisation methods and add support for more activation fucntions (I should have put more focus on that from the start)
+
+
+-Eventually: 
+  Start experimenting with novel model ideas
+  add support for more model types: i.e. bayesian models VSMs and what not
+  
+
+done:
+  
