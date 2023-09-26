@@ -12,6 +12,8 @@ Todo:
     test for bugs
     Implement GAN class
     Imorove nonlinearisation methods and add support for more activation fucntions (I should have put more focus on that from the start)
+    add support for SVMs
+
 
 
 -Eventually: 
