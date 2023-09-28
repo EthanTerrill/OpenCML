@@ -2,6 +2,7 @@
 Todo:
   -right now:
     Speeding up constructor/desctructor speeds
+    Fix DNN layers
   -Soon:
     run security tests on code
     add support for CPU based devices 
