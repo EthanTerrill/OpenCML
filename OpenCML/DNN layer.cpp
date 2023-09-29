@@ -18,6 +18,10 @@ private:
 
 	cl_mem metadata; 
 
+
+	// this is a very bandaid solution I would like to replace this later but for now it works and im tired
+	cl_mem metadata2;
+
 	int inpWidth;
 	int outpWidth;
 	int inpDimensionNum;
@@ -52,7 +56,7 @@ private:
 		cl_int r;
 		clSetKernelArg(DNN_PROPGATE, 0, sizeof(cl_mem), &weights);
 		clSetKernelArg(DNN_PROPGATE, 2, sizeof(cl_mem), &nodeVals.buffers[0].data);
-		clSetKernelArg(DNN_PROPGATE, 3, sizeof(cl_mem), &metadata);
+		clSetKernelArg(DNN_PROPGATE, 3, sizeof(cl_mem), &metadata2);
 
 		for (int i = 0; i < inpDimensionNum; i++) {
 		
@@ -146,6 +150,10 @@ private:
 
 		ret = clEnqueueWriteBuffer(COMMAND_QUEUE, metadata, CL_TRUE, 0, 2 * sizeof(int), mem, 0, NULL, NULL);
 
+		mem = new int[2]{ 1, outpWidth };
+		metadata2 = clCreateBuffer(CONTEXT_CL, CL_MEM_READ_ONLY, 2 * sizeof(int), NULL, &ret);
+
+		ret = clEnqueueWriteBuffer(COMMAND_QUEUE, metadata, CL_TRUE, 0, 2 * sizeof(int), mem, 0, NULL, NULL);
 
 		delete[] mem;
 
@@ -191,7 +199,7 @@ private:
 	void update() {
 		
 		subtractandclear(dweights, weights, metadata);
-		subtractandclear(dBias, bias, metadata);
+		subtractandclearB(dBias, bias, metadata);
  		clearBuffers();
 	};
 
@@ -231,17 +239,20 @@ private:
 	void getBufferCostsPrevLayer (image dOutputPrevLayer) {
 		
 
-		solveDbias();
+		if (!Bsolved) {
+
+			solveDbias();
+
+		}
 		solveDprevLayer(dOutputPrevLayer);
 
-		Bsolved = true;
 	};
 
 	image getBuffers() {
 
 
 	
-		return activeNodeVals;
+		return nodeVals;
 	}
 
 	image getdBuffers() {

@@ -163,7 +163,7 @@ __kernel void convolve_180
 
 __kernel void add
 (
-    __constant float* inpBuffer,
+    __global float* inpBuffer,
     __global float* outBuffer,
     __constant int* inpBufferMetaData
 )
@@ -213,14 +213,34 @@ __kernel void subtractAndClear
     __constant float* learningRate
 )
 {
+    float lr = learningRate[0];
+    int width  = inpBufferMetaData[0];
+    int height = inpBufferMetaData[1];
 
+    for(int i = get_global_id(0); i < width * height ; i += get_global_size(0))
+    {
+        
+        outBuffer[i] -= inpBuffer[i ] *  lr;
+        inpBuffer[i] = 0;
+    }
+
+}
+__kernel void subtractBias
+(
+    __global float* inpBuffer,
+    __global float* outBuffer,
+    __constant int* inpBufferMetaData,
+    __constant float* learningRate
+)
+{
+    float lr = learningRate[0];
     int width  = inpBufferMetaData[0];
     int height = inpBufferMetaData[1];
 
     for(int i = get_global_id(0); i < width * height; i += get_global_size(0))
     {
         
-        outBuffer[i] -= inpBuffer[i ] *  learningRate[0];
+        outBuffer[i] -= inpBuffer[i ] *  lr;
         inpBuffer[i] = 0;
     }
 
@@ -632,8 +652,8 @@ __kernel void DNN_propogate
 )
 {
 
-    int inpWidth   = metaData[0];
-    int outpWidth  = metaData[1];
+    int inpWidth   = inpMetaData[0] *  inpMetaData[1];
+    int outpWidth  = metaData[0] * metaData[1];
     int d          = inpMetaData[3];
 
 
