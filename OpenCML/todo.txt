@@ -2,7 +2,6 @@
 Todo:
   -right now:
   
-    Fix DNN layers (cause by differences between metadata formats)
     Speeding up constructor/desctructor speeds
     
   -Soon:
