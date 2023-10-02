@@ -1,8 +1,13 @@
 #pragma once
 
+const int BUFFER_MAX_SIZE = 999999;
+const int BUFFER_MAX_DIMENSION = 99999;
+
 struct buffer {
+
 private:
-    unsigned int width, height ;
+
+    unsigned int width, height;
 
 public:
     cl_mem data;
@@ -17,12 +22,20 @@ public:
     }
 
 
-    buffer(int width, int height, int dimension, int dimensionNum) {
+    buffer(int width, int height, int dimension,  int dimensionNum) {
 
 
 
 
         cl_int ret = 0;
+        
+            
+        assert(width        >  0 && width           < BUFFER_MAX_SIZE);
+        assert(height       >  0 && height          < BUFFER_MAX_SIZE);
+        assert(dimensionNum >  0 && dimensionNum    < BUFFER_MAX_DIMENSION);
+        assert(dimension    >= 0 && dimension       < dimensionNum);
+         
+
 
         this->width = width;
         this->height = height;
@@ -31,15 +44,13 @@ public:
 
         if (temp != NULL)
             for (int x = 0; x < width * height; x++)
-                    if (x < height * width)    // if statement to prevent overflow (intellisense can be a little annoying)
                         temp[x] = 0;
             
 
 
         data = clCreateBuffer(CONTEXT_CL, CL_MEM_READ_WRITE, size_t(width * height) * sizeof(float), NULL, &ret);
-        ret = clEnqueueWriteBuffer(COMMAND_QUEUE, data, CL_FALSE, 0, size_t(width * height) * sizeof(float), temp, 0, NULL, NULL);
-
-        
+        ret  = clEnqueueWriteBuffer(COMMAND_QUEUE, data, CL_FALSE, 0, size_t(width * height) * sizeof(float), temp, 0, NULL, NULL);
+        assert(ret == 0);
 
         int* meta = new int[4];
 
@@ -50,8 +61,10 @@ public:
             meta[3] = dimension;
         }
         this->meta = clCreateBuffer(CONTEXT_CL, CL_MEM_READ_ONLY, 4 * sizeof(int), NULL, &ret);
-
         ret = clEnqueueWriteBuffer(COMMAND_QUEUE, this->meta, CL_TRUE, 0, 4 * sizeof(int), meta, 0, NULL, NULL);
+        assert(ret == 0);
+
+
         delete[] temp;
         delete[] meta;
 
@@ -60,6 +73,18 @@ public:
 
     buffer(int width, int height, int dimension, int dimensionNum, float** buffer) {
                
+
+
+
+        assert(width > 0 && width < BUFFER_MAX_SIZE);
+        assert(height > 0 && height < BUFFER_MAX_SIZE);
+        assert(dimensionNum > 0 && dimensionNum < BUFFER_MAX_DIMENSION);
+        assert(dimension >= 0 && dimension < dimensionNum);
+
+        assert(buffer[width - 1][height - 1]);
+
+
+
         cl_int ret = 0;
 
         this->width = width;
@@ -71,6 +96,8 @@ public:
 
         //create buffer 
         this->data = clCreateBuffer(CONTEXT_CL, CL_MEM_READ_WRITE, size_t(width * height) * sizeof(float), NULL, &ret);
+        assert(ret == 0);
+
         //assign memory to buffer
         clEnqueueWriteBuffer(COMMAND_QUEUE, this->data, CL_FALSE, 0, size_t(width * height) * sizeof(float), temp, 0, NULL, NULL);
 
@@ -84,8 +111,12 @@ public:
             meta[3] = dimension;
         }
         this->meta = clCreateBuffer(CONTEXT_CL, CL_MEM_READ_WRITE, 4 * sizeof(int), NULL, &ret);
+        assert(ret == 0);
+
 
         ret = clEnqueueWriteBuffer(COMMAND_QUEUE, this->meta, CL_TRUE, 0, 4 * sizeof(int), meta, 0, NULL, NULL);
+        assert(ret == 0);
+
 
 
 
