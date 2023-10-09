@@ -1,7 +1,8 @@
 
 Todo:
   -right now:
-  
+
+    Fix issue w/ forward propogating 2x in a row
     Speeding up constructor/desctructor speeds
     
   -Soon:
