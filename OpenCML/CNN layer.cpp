@@ -73,6 +73,15 @@ public:
 		}
 	}
 
+	void clearFBuffers() {
+
+		for (int j = 0; j < outpNum; j++) {
+
+			outputs.getBuffer(j).clear();
+			
+		}
+	}
+
 	buffer getBuffer(int n) {
 		return outputs.getBuffer(n);
 	}
@@ -130,6 +139,8 @@ public:
 		}
 		clearBuffers();
 	}
+
+
 	void kernelstoBmp(int d, std::string fileName) {
 
 		float*** bmpBuffer = new float** [3];

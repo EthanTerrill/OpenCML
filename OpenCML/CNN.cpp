@@ -135,6 +135,15 @@ public:
 			layers[i].update();
 		}
 	}
+	void clearFBuffer() {
+
+		clSetKernelArg(SUBTRACT_AND_CLEAR, 3, sizeof(cl_mem), &lr);
+
+
+		for (int i = 0; i < layers.size(); i++) {
+			layers[i].clearF();
+		}
+	}
 
 	void save(std::string fileName) {
 		std::ofstream f;

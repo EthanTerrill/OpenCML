@@ -152,9 +152,10 @@ public:
 		for (int i = 0; i < batch[n].size(); i++) {
 			network.forwardPropagate(input[batch[n][i]]);
 			network.backpropagate(input[batch[n][i]], output[batch[n][i]]);
+			network.clearFBuffer();
 					
 		}
-		network.update();
+		//network.update();
 		
 	}
 	int getBatchNum() {

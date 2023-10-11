@@ -221,7 +221,7 @@ public:
 		clSetKernelArg(SUBTRACT_AND_CLEAR, 1, sizeof(cl_mem), &weights);
 		clSetKernelArg(SUBTRACT_AND_CLEAR, 2, sizeof(cl_mem), &metaData);
 
-		//r = clEnqueueNDRangeKernel(COMMAND_QUEUE, SUBTRACT_AND_CLEAR, 1, NULL, &GLOBAL_ITEM_SIZE, &LOCAL_ITEM_SIZE, 0, NULL, NULL);
+		r = clEnqueueNDRangeKernel(COMMAND_QUEUE, SUBTRACT_AND_CLEAR, 1, NULL, &GLOBAL_ITEM_SIZE, &LOCAL_ITEM_SIZE, 0, NULL, NULL);
 
 
 		clFinish(COMMAND_QUEUE);

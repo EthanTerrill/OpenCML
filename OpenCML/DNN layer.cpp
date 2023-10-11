@@ -203,6 +203,13 @@ private:
  		clearBuffers();
 	};
 
+	void clearFBuffers() {
+
+		nodeVals.getBuffer(0).clear();
+		activeNodeVals.getBuffer(0).clear();
+		dvalues.getBuffer(0).clear();
+
+	}
 	void getWeightCosts(image input) {
 
 		if (!Bsolved) {
@@ -252,7 +259,7 @@ private:
 
 
 	
-		return nodeVals;
+		return activeNodeVals;
 	}
 
 	image getdBuffers() {

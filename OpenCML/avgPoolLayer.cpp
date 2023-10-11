@@ -92,4 +92,13 @@ public:
 		}
 	}
 
+	void clearFBuffers() {
+
+		for (int j = 0; j < outputs.getDimensionNum(); j++) {
+
+			outputs.getBuffer(j).clear();
+			dOutputs.getBuffer(j).clear();
+		}
+	}
+
 };
