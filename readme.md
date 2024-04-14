@@ -11,7 +11,7 @@ a significant usage of heap memory allocation and generally move towards a syste
 I may end up releasing massive overhauls in the distant future depending on how succesfull the project becomes and how much my design philosophy evolves over the next few years 
 but the basic plan right now is to add in Datasets and GAN.s and then begin exploring with more layer types and whatever other feutures I decide to add, currently
 Im not planning on doing anything with LLM.s like ChatGPT being as I dont personally find them very fascinating from any perspective other than cybersecurity, If you would like
-to see support for LLM models feel free to contribute to the repository or send constant nagging requests for new feutures and what not ar ethanrobertterrill@gmail.com
+to see support for LLM models feel free to contribute to the repository or send constant nagging requests for new feutures and what not at ethanrobertterrill@gmail.com
 
 Also Im aware there are lots of bugs and x-platform support issues, Im working on them but my time is split pretty heavily between other projects and school right now
 so it might be a while before things start to look nice
