@@ -7,6 +7,7 @@ cl_kernel COPY;
 cl_kernel LAST_LAYER_PROPOGATE;
 cl_kernel ADD;
 cl_kernel SUBTRACT;
+cl_kernel SUBTRACT_AND_CLEAR_B;
 cl_kernel SUBTRACT_AND_CLEAR;
 cl_kernel THRESHOLD;
 cl_kernel LIGHT_SIGMOID;

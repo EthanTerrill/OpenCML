@@ -1,46 +1,76 @@
 class CNN {
 private:
 
+	//vector containing layers of the model
 	std::vector<layer> layers;
 
+	//vector storing the layer types
 	std::vector<layerType> layerTypes;
+
+	std::vector<stride> strideSizes;
+
+
+	//vectors storign layer metaData
 	std::vector<int> layerDimensions;
 	std::vector<int> kernelSizes;
+
+	//firstLayer metaData
 	int inputWidth, inputHeight;
 	
+	//memory for storing the learniing reate
 	cl_mem lr;
 
 public:
 
+
+	/*
+		inputDimensionNum: 
+							-The number of dimensions (e.g. r,g,b = 3 ) in the first input
+
+		inputWidth:
+							-Width of the first input
+
+		inputHeight:
+							-Height of the first input
+	*/
 	CNN(int inpDimensionNum, int inputWidth, int inputHeight) {
 
+
+		//define input layer specs
 		layerDimensions.push_back(inpDimensionNum);
-		this->inputHeight = inputHeight;
-		this->inputWidth = inputWidth;
+		this->inputHeight	= inputHeight;
+		this->inputWidth	= inputWidth;
 
-		float* l = new float[1]{ 0.1 };
 
+		// define the learning rate
+		float* lrTemp = new float[1] { 0.1 };
+
+		
+		//initialize lr (store l)
 		cl_int ret;
+		lr =	clCreateBuffer		(CONTEXT_CL,		CL_MEM_READ_WRITE,  sizeof(float), NULL, &ret);
+				clEnqueueWriteBuffer(COMMAND_QUEUE, lr, CL_TRUE, 0,			sizeof(int),	lrTemp, 0, NULL, NULL);
 
-		lr = clCreateBuffer(CONTEXT_CL, CL_MEM_READ_WRITE,  sizeof(float), NULL, &ret);
-		clEnqueueWriteBuffer(COMMAND_QUEUE, lr, CL_TRUE, 0, sizeof(int), l, 0, NULL, NULL);
 
-		delete[] l;
+		//cleanup
+		delete[] lrTemp;
 
 
 	}
 
+	
 	void setLearningRate(float f) {
 	
-
-		float* l = new float[1]{ f };
+		//create new pointer to float value
+		float* lrTemp = new float[1]{ f };
 
 		cl_int ret;
 
 		lr = clCreateBuffer(CONTEXT_CL, CL_MEM_READ_WRITE, sizeof(float), NULL, &ret);
-		clEnqueueWriteBuffer(COMMAND_QUEUE, lr, CL_TRUE, 0, sizeof(float), l, 0, NULL, NULL);
+		clEnqueueWriteBuffer(COMMAND_QUEUE, lr, CL_TRUE, 0, sizeof(float), lrTemp, 0, NULL, NULL);
 
-		delete[] l;
+		//cleanup
+		delete[] lrTemp;
 	}
 
 	void addLayer(layerType t, int dimensionNum, int kernelSize) {
@@ -48,14 +78,17 @@ public:
 		layerDimensions.push_back(dimensionNum);
 		kernelSizes.push_back(kernelSize);
 		layerTypes.push_back(t);
+		strideSizes.push_back(STRIDE_1x1);
 
 	}
-	void addLayer(layerType t, int kernelSize) {
+	void addLayer(layerType t, int kernelSize, stride strideSize) {
 
 		if (t == AVG_POOL_LAYER || t == SCALE_UP_LAYER) {
 			layerDimensions.push_back(layerDimensions[layerDimensions.size() - 1]);
 			kernelSizes.push_back(kernelSize);
 			layerTypes.push_back(t);
+			strideSizes.push_back(strideSize);
+
 		}
 		else if (t == DNN) {
 			layerDimensions.push_back(1);
@@ -76,10 +109,28 @@ public:
 		int h = inputHeight;
 		for (int i = 1; i < layerDimensions.size(); i++) {
 
-			layer l = layer(layerTypes[i - 1], layerDimensions[i - 1], layerDimensions[i], kernelSizes[i - 1], kernelSizes[i - 1], w, h, layerDimensions[i - 1]);
-			layers.push_back(l);
-			w = l.getBuffers().getWidth();
-			h = l.getBuffers().getHeight();
+			layerType t = layerTypes[i - 1];
+
+			if ( 
+				t == AVG_POOL_LAYER || 
+				t == SCALE_UP_LAYER) 
+			{
+				layer l = layer(layerTypes[i - 1], layerDimensions[i - 1], layerDimensions[i], kernelSizes[i - 1], kernelSizes[i - 1], w, h, layerDimensions[i - 1], strideSizes[i - 1]);
+				layers.push_back(l);
+				w = l.getBuffers().getWidth();
+				h = l.getBuffers().getHeight();
+
+			}
+			else 
+			{
+				layer l = layer(layerTypes[i - 1], layerDimensions[i - 1], layerDimensions[i], kernelSizes[i - 1], kernelSizes[i - 1], w, h, layerDimensions[i - 1]);
+				layers.push_back(l);
+				w = l.getBuffers().getWidth();
+				h = l.getBuffers().getHeight();
+
+			}
+
+			
 
 		}
 
@@ -146,17 +197,23 @@ public:
 	}
 
 	void save(std::string fileName) {
-		std::ofstream f;
 
+
+		std::ofstream f;
 		f.open( fileName, std::ios::binary);
+
 
 		f << "FILE_TYPE: DNN FORMAT V1\n";
 		f << layerTypes.size() << "\n";
+
+
 		for (int i = 0; i < layerTypes.size(); i++) {
+
 			f << layerTypes[i] << " " << layerDimensions[i + 1] << " " << kernelSizes[i] << "\n";
 		}
 
 		for (int i = 0; i < layerTypes.size(); i++) {
+
 			layers[i].save(&f);
 		}
 
@@ -171,9 +228,6 @@ public:
 		char  garbage;
 
 		f.open(fileName, std::ios::binary | std::ios::in);
-
-
-
 		f.read(garbageP, 24);
 
 		
@@ -182,6 +236,7 @@ public:
 
 		
 		for (int i = 0; i < layerSize; i++) {
+
 			int layerT;
 			int layerDimension;
 			int kernelSize;

@@ -2,6 +2,7 @@ class scaleUpLayer {
 
 private:
 	int height, width, size;
+	stride s;
 	image outputs;
 	image dOutputs;
 	cl_mem meta;
@@ -9,20 +10,21 @@ private:
 
 public:
 
-	scaleUpLayer(int inputWidth, int inputHeight, int dimensionNum, int ksize) {
+	scaleUpLayer(int inputWidth, int inputHeight, int dimensionNum, int ksize, stride strideSize) {
 
-		outputs = image(inputWidth * ksize, inputHeight * ksize, dimensionNum);
-		dOutputs = image(inputWidth * ksize, inputHeight * ksize, dimensionNum);
-		height = inputHeight * ksize;
-		width = inputWidth * ksize;
-		size = ksize;
+		s			= strideSize;
+		outputs		= image(inputWidth * ksize, inputHeight * ksize, dimensionNum);
+		dOutputs	= image(inputWidth * ksize, inputHeight * ksize, dimensionNum);
+		height		= inputHeight * ksize;
+		width		= inputWidth * ksize;
+		size		= ksize;
 
-		int* metadata = new int[4]{ width, height, ksize, dimensionNum };
+		int* metadata = new int[5]{ width, height, ksize, dimensionNum, s };
 
 		cl_int ret;
 
-		meta = clCreateBuffer(CONTEXT_CL, CL_MEM_READ_WRITE, 4 * sizeof(int), NULL, &ret);
-		ret = clEnqueueWriteBuffer(COMMAND_QUEUE, meta, CL_TRUE, 0, 4 * sizeof(int), metadata, 0, NULL, NULL);
+		meta = clCreateBuffer(CONTEXT_CL, CL_MEM_READ_WRITE, 5 * sizeof(int), NULL, &ret);
+		ret = clEnqueueWriteBuffer(COMMAND_QUEUE, meta, CL_TRUE, 0, 5 * sizeof(int), metadata, 0, NULL, NULL);
 
 
 	}
@@ -81,6 +83,14 @@ public:
 
 	}
 	void clearBuffers() {
+
+		for (int j = 0; j < outputs.getDimensionNum(); j++) {
+
+			outputs.getBuffer(j).clear();
+			dOutputs.getBuffer(j).clear();
+		}
+	}
+	void clearFBuffers() {
 
 		for (int j = 0; j < outputs.getDimensionNum(); j++) {
 

@@ -155,7 +155,7 @@ public:
 			network.clearFBuffer();
 					
 		}
-		//network.update();
+		network.update();
 		
 	}
 	int getBatchNum() {

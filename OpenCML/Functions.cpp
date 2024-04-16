@@ -151,6 +151,13 @@ void array1dToArray2d(float** & arr2d, float* arr1d, int width, int height) {
 void writeBufferToBmp(std::string fileName, int width, int height, float*** buffer) {
 
 
+    assert(width > 0);
+    assert(height > 0);
+    assert(buffer);
+
+
+
+
     int padSize = width % 4;
 
 
@@ -180,6 +187,24 @@ void writeBufferToBmp(std::string fileName, int width, int height, float*** buff
 }
 
 void subtractandclear(cl_mem input, cl_mem output, cl_mem metadata) {
+
+
+    
+
+    cl_int r;
+    clSetKernelArg(SUBTRACT_AND_CLEAR, 0, sizeof(cl_mem), &input);
+    clSetKernelArg(SUBTRACT_AND_CLEAR, 1, sizeof(cl_mem), &output);
+    clSetKernelArg(SUBTRACT_AND_CLEAR, 2, sizeof(cl_mem), &metadata);
+
+    r = clEnqueueNDRangeKernel(COMMAND_QUEUE, SUBTRACT_AND_CLEAR, 1, NULL, &GLOBAL_ITEM_SIZE, &LOCAL_ITEM_SIZE, 0, NULL, NULL);
+
+
+    clFinish(COMMAND_QUEUE);
+
+
+}
+
+void subtractandclearB(cl_mem input, cl_mem output, cl_mem metadata) {
 
 
     cl_int r;

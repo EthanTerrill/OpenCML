@@ -24,6 +24,7 @@ __kernel void convolve
     const __global int* kernelMetaData
 )
 {
+
     int kWidth  = kernelMetaData[0];
     int kHeight = kernelMetaData[1];
 
@@ -35,7 +36,6 @@ __kernel void convolve
     int outputHeight = (height - kHeight + 1); 
     
     if(outputWidth * outputHeight > kWidth * kHeight){
-        
         for(int i = get_global_id(0); i < outputWidth; i += get_global_size(0))
         {
         
@@ -81,6 +81,74 @@ __kernel void convolve
 
 
 }
+
+__kernel void qconvolve
+(
+    const __global float* Kernel,
+    const __global float* inputBuffer, 
+    __global float* outputBuffer, 
+    const __global int* inpBufferMetaData,
+    const __global int* kernelMetaData
+)
+{
+    int kWidth  = kernelMetaData[0];
+    int kHeight = kernelMetaData[1];
+
+    int width  = inpBufferMetaData[0];
+    int height = inpBufferMetaData[1];
+    int d  = inpBufferMetaData[3];  
+
+    int outputWidth  = (width - kWidth + 1);
+    int outputHeight = (height - kHeight + 1); 
+    
+    if(outputWidth * outputHeight > kWidth * kHeight){
+        for(int i = get_global_id(0); i < outputWidth; i += get_global_size(0))
+        {
+        
+            for(int j = get_global_id(1); j < outputHeight; j += get_global_size(1))
+            {
+                float pixel = 0;
+                for(int x = 0; x < kWidth; x++)
+                {
+                    for(int y = 0; y < kHeight; y++)
+                    {
+                        pixel += inputBuffer[ (i + x) * (height) + ( j + y) ] * Kernel[y * kWidth + x];
+                    }
+                }
+                outputBuffer[i * outputHeight + j] += pixel;
+        
+            }
+        
+        }
+    }
+    else
+    {
+        for(int i = 0; i < outputWidth; i += 1)
+        {
+        
+            for(int j = 0; j < outputHeight; j += 1)
+            {
+                float pixel = 0;
+                for(int x = get_global_id(0); x < kWidth; x+= get_global_size(0))
+                {
+                    for(int y = get_global_id(1); y < kHeight; y+= get_global_size(1))
+                    {
+                        
+                        pixel += inputBuffer[ (i + x) * (height) + ( j + y) ] * Kernel[y * kWidth + x];
+                    }
+                }
+
+                outputBuffer[i * outputHeight + j] += pixel;
+        
+            }
+        
+        }        
+    }
+
+
+}
+
+
 
 __kernel void convolve_180
 (
@@ -271,23 +339,23 @@ __kernel void threshold
     __global int* metaData
 )
 {
-
+    int stride = 1;
 
     int width  = metaData[0];
     int height = metaData[1];
 
-    for(int i = get_global_id(0); i < width; i += get_global_size(0))
+    for(int i = get_global_id(0); i * stride < width ; i += get_global_size(0))
     {
         
-        for(int j = get_global_id(1); j < height; j += get_global_size(1))
+        for(int j = get_global_id(1); j * stride < height; j += get_global_size(1))
         {
             
-            if(buffer[i * height + j] < 0.1){
+            if(buffer[i * height * stride + j * stride] < 0.1){
 
-                buffer[i * height + j] = 0;
+                buffer[i * height * stride + j * stride] = 0;
             } 
             else{
-                buffer[i * height + j] = 1;
+                buffer[i * height * stride + j * stride] = 1;
             }
         }
         
@@ -505,27 +573,39 @@ __kernel void avgPool
 {
 
 
-    int width  = inpBufferMetaData[0];
-    int height = inpBufferMetaData[1];
-    int size   = inpBufferMetaData[2];
-    int outpHeight = height/size;
 
-    float scale = 1.0/(size * size * 3);
+    int stride      = inpBufferMetaData[4];
+    int width       = inpBufferMetaData[0];
+    int height      = inpBufferMetaData[1];
+    int size        = inpBufferMetaData[2];
+    int outpHeight  = height/(size * stride);
+    int outpWidth  = width/(size * stride);
 
-    for(int i = get_global_id(0); i < width/size; i += get_global_size(0))
+    float scale = 1.0/(size * size);
+    
+    
+    for(int i = get_global_id(0); i < outpWidth; i += get_global_size(0))
     {
-        
-        for(int j = get_global_id(1); j < height/size; j += get_global_size(1))
+        for(int j = get_global_id(1); j < outpHeight; j += get_global_size(1))
         {
-            
+            int scale = 0;
             for(int x = 0; x < size; x++)
             {
                 for(int y = 0; y < size; y++)
                 {
-                    outBuffer[i * outpHeight + j] += inpBuffer[(i * size + x) * height + size * j + y]*(scale);
+
+                    int ix = (i * size * stride + x);
+                    int iy =  size * j * stride + y;
+
+                    if(ix < width && iy < height){
+                        scale++;
+                        outBuffer[i *  outpHeight + j] += inpBuffer[ ix * height + iy];
+                       
+                    }
                     
                 }
             }
+            outBuffer[i *  outpHeight + j] /= scale;
         
         }
         
@@ -539,12 +619,13 @@ __kernel void avgPoolCost
     __constant int* inpBufferMetaData
 )
 {
+    int stride      = inpBufferMetaData[4];
     
     int width  = inpBufferMetaData[0];
     int height = inpBufferMetaData[1];
-    int size   = inpBufferMetaData[2];
+    int size   = inpBufferMetaData[2] * stride;
     int dim    = inpBufferMetaData[3];
-    int inpHeight = height/size;
+    int inpHeight = height/(size);
 
 
     for(int i = get_global_id(0); i < width/size; i += get_global_size(0))

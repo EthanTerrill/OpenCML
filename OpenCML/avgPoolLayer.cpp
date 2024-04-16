@@ -1,6 +1,6 @@
 class avgPoolLayer {
 private:
-	int height, width, size;
+	int height, width, size, strideS;
 	image outputs;
 	image dOutputs;
 	cl_mem meta;
@@ -9,28 +9,56 @@ private:
 public:
 
 	avgPoolLayer(int inputWidth, int inputHeight, int dimensionNum, int ksize){
-		
+
+
+		strideS = 1;
 		outputs	= image(inputWidth / ksize, inputHeight / ksize, dimensionNum);
 		dOutputs = image(inputWidth / ksize, inputHeight / ksize, dimensionNum);
 		height	= inputHeight/ksize;
 		width	= inputWidth/ksize;
 		size	= ksize;
 
-		int* metadata = new int[4]{inputWidth, inputHeight, ksize, dimensionNum};
+		int* metadata = new int[5]{inputWidth, inputHeight, ksize, dimensionNum, strideS};
 
 
 
 		cl_int ret;
 
-		meta = clCreateBuffer(CONTEXT_CL, CL_MEM_READ_WRITE, 4 * sizeof(int), NULL, &ret);
-		ret = clEnqueueWriteBuffer(COMMAND_QUEUE, meta, CL_TRUE, 0, 4 * sizeof(int), metadata, 0, NULL, NULL);
+		meta	= clCreateBuffer		(CONTEXT_CL,			CL_MEM_READ_WRITE, 5 * sizeof(int), NULL,	&ret);
+		ret		= clEnqueueWriteBuffer	(COMMAND_QUEUE, meta,	CL_TRUE,		0, 5 * sizeof(int),			metadata, 0, NULL, NULL);
+
+		delete[] metadata;
+
+	}
+	avgPoolLayer(int inputWidth, int inputHeight, int dimensionNum, int ksize, stride strideSize) {
+
+		
+
+		height		= inputHeight / (ksize * strideSize);
+		width		= inputWidth  / (ksize * strideSize);
+		strideS		= strideSize;
+		outputs		= image(width, height, dimensionNum);
+		dOutputs	= image(width, height, dimensionNum);
+		
+		size		= ksize;
+
+		int* metadata = new int[5]{ inputWidth, inputHeight, ksize, dimensionNum, strideS };
+
+
+
+		cl_int ret;
+
+		meta = clCreateBuffer(CONTEXT_CL, CL_MEM_READ_WRITE, 5 * sizeof(int), NULL, &ret);
+		ret = clEnqueueWriteBuffer(COMMAND_QUEUE, meta, CL_TRUE, 0, 5 * sizeof(int), metadata, 0, NULL, NULL);
+
+		delete[] metadata;
 
 	}
 
 
-
 	image getBuffers() {
 		return outputs;
+
 	}
 	image getdBuffers() {
 		return dOutputs;
