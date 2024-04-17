@@ -1,11 +1,10 @@
 class CNN_layer{
 
 	image outputs;
-
 	image dOutputs;
 	std::vector<std::vector<CNN_kernel>> kernels;
 
-
+	stride strideSize;
 
 private:
 	
@@ -29,24 +28,32 @@ private:
 public:
 	CNN_layer(int inputBufferNum, int outputBufferNum, int kernelWidth, int kernelHeight, int inpBufferWidth, int inpBufferHeight) {
 	
-		kW		= kernelWidth;
-		kH		= kernelHeight;
-		inpNum	= inputBufferNum;
-		outpNum = outputBufferNum;
+		kW			= kernelWidth;
+		kH			= kernelHeight;
+		inpNum		= inputBufferNum;
+		outpNum		= outputBufferNum;
+		strideSize	= STRIDE_2x2;
 
 		for (int i = 0; i <inputBufferNum; i++) {
 			std::vector<CNN_kernel> temp;
 			for (int j = 0; j < outputBufferNum; j++) {
 
-				temp.push_back(CNN_kernel(kernelWidth, kernelHeight));
+				temp.push_back(CNN_kernel(kernelWidth, kernelHeight, strideSize));
 			}
 
 			kernels.push_back(temp);
 		}
 
-		if (inpBufferWidth - kernelWidth + 1 > 0 && inpBufferHeight - kernelHeight + 1 > 0) {
-			outputs = image(inpBufferWidth - kernelWidth + 1, inpBufferHeight - kernelHeight + 1, outputBufferNum);
-			dOutputs = image(inpBufferWidth - kernelWidth + 1, inpBufferHeight - kernelHeight + 1, outputBufferNum);
+		int outputWidth = (inpBufferWidth - kernelWidth + 1) / strideSize;
+		int outputHeight = (inpBufferHeight - kernelHeight + 1) / strideSize;
+
+		if (outputWidth > 0 && outputHeight > 0) {
+
+
+			
+
+			outputs		= image(outputWidth, outputHeight, outputBufferNum);
+			dOutputs	= image(outputWidth, outputHeight, outputBufferNum);
 		}
 		else {
 		

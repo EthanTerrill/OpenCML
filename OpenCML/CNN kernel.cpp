@@ -22,14 +22,14 @@ public:
 
 		dWeights = clCreateBuffer(CONTEXT_CL, CL_MEM_READ_WRITE, size_t(width * height) * sizeof(float), NULL, &ret);
 		weights  = clCreateBuffer(CONTEXT_CL, CL_MEM_READ_WRITE, size_t(width * height) * sizeof(float), NULL, &ret);
-		metaData = clCreateBuffer(CONTEXT_CL, CL_MEM_READ_WRITE, size_t(2)     * sizeof(float), NULL, &ret);
+		metaData = clCreateBuffer(CONTEXT_CL, CL_MEM_READ_WRITE, size_t(3)     * sizeof(float), NULL, &ret);
 
 
 		this->width = NULL;
 		this->height = NULL;
 
 	}
-	CNN_kernel(int width, int height)
+	CNN_kernel(int width, int height, stride strideSize)
 	{
 		
 		if (width == 0 || height == 0)
@@ -47,20 +47,21 @@ public:
 		
 		}
 
-		int* meta = new int[2]
+		int* meta = new int[3]
 		{
 			width,
-			height
+			height,
+			strideSize
 		};
 
 		cl_int ret;
 
 		weights   = clCreateBuffer(CONTEXT_CL, CL_MEM_READ_WRITE, size_t(width * height) * sizeof(float), NULL, &ret);
 		dWeights  = clCreateBuffer(CONTEXT_CL, CL_MEM_READ_WRITE, size_t(width * height) * sizeof(float), NULL, &ret);
-		metaData  = clCreateBuffer(CONTEXT_CL, CL_MEM_READ_WRITE, size_t(2)     * sizeof(float), NULL, &ret);
+		metaData  = clCreateBuffer(CONTEXT_CL, CL_MEM_READ_WRITE, size_t(3)     * sizeof(float), NULL, &ret);
 
 
-		clEnqueueWriteBuffer(COMMAND_QUEUE, metaData,  CL_TRUE, 0, 2 * sizeof(int),                meta,  0, NULL, NULL);
+		clEnqueueWriteBuffer(COMMAND_QUEUE, metaData,  CL_TRUE, 0, 3 * sizeof(int),                meta,  0, NULL, NULL);
 		clEnqueueWriteBuffer(COMMAND_QUEUE, weights,   CL_TRUE, 0, width * height * sizeof(float), temp,  0, NULL, NULL);
 		clEnqueueWriteBuffer(COMMAND_QUEUE, dWeights,  CL_TRUE, 0, width * height * sizeof(float), NULL, 0, NULL, NULL);
 
@@ -69,7 +70,7 @@ public:
 
 
 	}
-	CNN_kernel(float** kernel, int width, int height) 
+	CNN_kernel(float** kernel, int width, int height, stride strideSize) 
 	{
 
 		if (kernel == nullptr || width == 0 || height == 0)
@@ -85,10 +86,11 @@ public:
 		float* dtemp = new float[width * height]{ 0 };
 		
 
-		int* meta = new int[2]
+		int* meta = new int[3]
 		{
 			width,
-			height
+			height,
+			strideSize
 		};
 
 		cl_int ret;
@@ -96,9 +98,9 @@ public:
 
 		weights  = clCreateBuffer(CONTEXT_CL, CL_MEM_READ_WRITE, size_t(width * height) * sizeof(float), NULL, &ret);
 		dWeights = clCreateBuffer(CONTEXT_CL, CL_MEM_READ_WRITE, size_t(width * height) * sizeof(float), NULL, &ret);
-		metaData = clCreateBuffer(CONTEXT_CL, CL_MEM_READ_WRITE, size_t(2) * sizeof(float), NULL, &ret);
+		metaData = clCreateBuffer(CONTEXT_CL, CL_MEM_READ_WRITE, size_t(3) * sizeof(float), NULL, &ret);
 
-		clEnqueueWriteBuffer(COMMAND_QUEUE, metaData,  CL_TRUE, 0, 2 * sizeof(int),                meta, 0, NULL, NULL);
+		clEnqueueWriteBuffer(COMMAND_QUEUE, metaData,  CL_TRUE, 0, 3 * sizeof(int),                meta, 0, NULL, NULL);
 		clEnqueueWriteBuffer(COMMAND_QUEUE, weights,   CL_TRUE, 0, width * height * sizeof(float), temp, 0, NULL, NULL);
 		clEnqueueWriteBuffer(COMMAND_QUEUE, dWeights,  CL_TRUE, 0, width * height * sizeof(float), dtemp, 0, NULL, NULL);
 

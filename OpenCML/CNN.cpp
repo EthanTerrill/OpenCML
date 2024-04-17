@@ -36,23 +36,31 @@ public:
 	CNN(int inpDimensionNum, int inputWidth, int inputHeight) {
 
 
-		//define input layer specs
+
+		//////////////////////////////////////////////////////////
+		//            define metadata
+		///////////////////////////////////////////////////////
 		layerDimensions.push_back(inpDimensionNum);
 		this->inputHeight	= inputHeight;
 		this->inputWidth	= inputWidth;
+		
 
 
-		// define the learning rate
+
+
+		//////////////////////////////////////////////////////////
+		//				set learning rate
+		///////////////////////////////////////////////////////
 		float* lrTemp = new float[1] { 0.1 };
 
-		
-		//initialize lr (store l)
 		cl_int ret;
 		lr =	clCreateBuffer		(CONTEXT_CL,		CL_MEM_READ_WRITE,  sizeof(float), NULL, &ret);
 				clEnqueueWriteBuffer(COMMAND_QUEUE, lr, CL_TRUE, 0,			sizeof(int),	lrTemp, 0, NULL, NULL);
 
 
-		//cleanup
+		//////////////////////////////////////////////////////////
+		//             cleanup
+		///////////////////////////////////////////////////////
 		delete[] lrTemp;
 
 
