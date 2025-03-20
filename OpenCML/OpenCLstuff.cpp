@@ -1,4 +1,8 @@
-#pragma once
+#include <CL/opencl.hpp>
+#include <assert.h>
+#include <cerrno>
+#include <iostream>
+#include <stdio.h>
 
 cl_kernel CLEAR_BUFFER_KERNEL;
 cl_kernel CONVOLVE;
@@ -93,11 +97,10 @@ void readKernelFile(FILE* f, size_t  source_size, char* source_str, const int ma
     //             Read Kernel Data
     ///////////////////////////////////////////////////////
 
-    errno_t error = fopen_s(&f, "SkyNet\\kernels.cl", "r");
+    f = fopen("SkyNet\\kernels.cl", "r");
 
-    assert(f);
+    assert(f != NULL);
     assert(source_str != NULL);
-    assert(!error);
     source_size = fread(source_str, 1, max_source_size, f);
     fclose(f);
     assert(source_size > 0);
@@ -118,7 +121,7 @@ void setGPUfunctions() {
 
     cl_device_id    deviceId            = NULL;
     cl_int          ret                 = 0;
-    cl_uint         ret_num_devices     = NULL;
+    cl_uint         ret_num_devices     = 0;
     cl_uint         ret_num_platforms;
     size_t          source_size;
 
@@ -132,11 +135,10 @@ void setGPUfunctions() {
     //             Read Kernel Data
     ///////////////////////////////////////////////////////
 
-    errno_t error = fopen_s(&f, "SkyNet\\kernels.cl", "r");
+    f = fopen("SkyNet\\kernels.cl", "r");
 
     assert(f);
     assert(source_str != NULL);
-    assert(!error);
     source_size = fread(source_str, 1, max_source_size, f);
     fclose(f);
     assert(source_size > 0);
@@ -155,7 +157,7 @@ void setGPUfunctions() {
 
 
     CONTEXT_CL = clCreateContext(NULL, ret_num_devices, &deviceId, NULL, NULL, &ret);
-    COMMAND_QUEUE = clCreateCommandQueue(CONTEXT_CL, deviceId, 0, &ret);
+    COMMAND_QUEUE = clCreateCommandQueueWithProperties(CONTEXT_CL, deviceId, 0, &ret);
 
 
     cl_program program = clCreateProgramWithSource(CONTEXT_CL, 1, (const char**)&source_str, (const size_t*)&source_size, &ret);
@@ -181,7 +183,6 @@ void setGPUfunctions() {
         //display errors
         std::cerr << log;
 
-        MessageBox(NULL, (LPCWSTR)L"Error: could not compile CL function...", (LPCWSTR)L"Fatal Program error", MB_ICONSTOP);
     }
 
 

@@ -1,4 +1,8 @@
-#pragma once
+#include <CL/opencl.hpp>
+#include <cassert>
+#include <fstream>
+
+#include "OpenCLstuff.cpp"
 
 const int BUFFER_MAX_SIZE = 999999;
 const int BUFFER_MAX_DIMENSION = 99999;
@@ -92,7 +96,7 @@ public:
 
 
         float* temp;
-        array2dToArray1d(temp, buffer, width, height);
+        // array2dToArray1d(temp, buffer, width, height);
 
         //create buffer 
         this->data = clCreateBuffer(CONTEXT_CL, CL_MEM_READ_WRITE, size_t(width * height) * sizeof(float), NULL, &ret);
@@ -183,7 +187,7 @@ public:
         
         float** RBG_buffer = nullptr;
         
-        array1dToArray2d(RBG_buffer, temp, width, height);
+        // array1dToArray2d(RBG_buffer, temp, width, height);
 
         delete[] temp;
 
@@ -196,7 +200,7 @@ public:
 
         float*** buffer = nullptr;
         
-        create3dArray(buffer, 3, width, height);
+        // create3dArray(buffer, 3, width, height);
 
 
 
@@ -231,7 +235,7 @@ public:
             ifs.close();
 
             float* cast;
-            array2dToArray1d(cast, buffer[index], width, height);
+            // array2dToArray1d(cast, buffer[index], width, height);
             ret = clEnqueueWriteBuffer(COMMAND_QUEUE, this->data, CL_TRUE, 0, size_t(width * height) * sizeof(float), cast, 0, NULL, NULL);
 
 
